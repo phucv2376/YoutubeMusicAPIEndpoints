@@ -2,11 +2,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
-from ytm_api.settings import MUSIC_LIB_DIR
+from ytm_api.settings import DOWNLOAD_DIR, MUSIC_LIB_DIR, YTDLP_CONFIG_PATH, BEET_CONFIG_PATH
 from ytmusicapi import YTMusic
 import os
 import json
 import subprocess
+import time
+import shutil
 
 
 def get_ytmusic_client():
@@ -279,6 +281,13 @@ def health(request):
 
 @api_view(['POST'])
 def download_song(request):
+    # Clean download folder
+    try:
+        shutil.rmtree(DOWNLOAD_DIR)
+        os.makedirs(DOWNLOAD_DIR)
+    except Exception as e:
+        print(f"Error cleaning download folder: {str(e)}")
+
     """Download a song."""
     video_id = request.data.get('video_id')
     if not video_id:
@@ -287,19 +296,13 @@ def download_song(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    print("Downloading song:", video_id)
     try:
         subprocess.run([
-            "yt-dlp_macos",
-            "-x",
-            "--audio-format", "opus",
-            "--audio-quality", "0",
-            "--embed-thumbnail",
-            "--embed-metadata",
-            "--replace-in-metadata", "artist", ",.*", "",
-            "-o", 
-            f"{MUSIC_LIB_DIR}/%(title)s.%(ext)s",
-            "--no-playlist",
-            "--no-continue",
+            "yt-dlp",
+            '--config-location', YTDLP_CONFIG_PATH,
+            "-P", 
+            DOWNLOAD_DIR,
             video_id
         ], check=True)
     except Exception as e:
@@ -307,29 +310,22 @@ def download_song(request):
             {'error': f"Download failed: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
+    
     # Import the downloaded song into the music library
+    print("Importing song into music library")
     try:
-        subprocess.run(['beet', 'import', MUSIC_LIB_DIR , "-q", "-A"], check=True, shell=True)
+        subprocess.run(['beet',  '--config', BEET_CONFIG_PATH, 'import', DOWNLOAD_DIR, "-q", "-A"], check=True)
     except Exception as e:
         return Response(
             {'error': f"Import failed: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     
+    print("Removing duplicates")
     try:
         subprocess.run(
-            "beet duplicates --delete",
+            f"beet --config {BEET_CONFIG_PATH} duplicates --delete",
             check=True,
-            shell=True
-        )
-    except Exception as e:
-        print(str(e))
-    
-    try:
-        subprocess.run(
-            "beet update",
-            check=True
             shell=True
         )
     except Exception as e:
@@ -363,7 +359,7 @@ def download_playlist(request):
             "--replace-in-metadata", "artist", ",.*", "",
             "--no-continue",
             "-o", 
-            f"{MUSIC_LIB_DIR}/%(title)s.%(ext)s",
+            f"{DOWNLOAD_DIR}/%(title)s.%(ext)s",
             playlist_id
         ], check=True)
     except Exception as e:

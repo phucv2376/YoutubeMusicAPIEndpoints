@@ -104,7 +104,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-MUSIC_LIB_DIR = os.path.expanduser("/Users/vo/Music_Library")
+MUSIC_LIB_DIR = os.path.expanduser("/Music_Library")
+DOWNLOAD_DIR = os.path.expanduser("/app/downloads")
+YTDLP_CONFIG_PATH = os.path.expanduser("/app/ytdlp.yaml")
+BEET_CONFIG_PATH = os.path.expanduser("/app/beet.yaml")
+# DOWNLOAD_DIR = os.path.expanduser("./downloads")
+# YTDLP_CONFIG_PATH = os.path.expanduser("./ytdlp.yaml")
+# BEET_CONFIG_PATH = os.path.expanduser("./beet.yaml")
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

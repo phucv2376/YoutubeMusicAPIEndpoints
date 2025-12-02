@@ -3,4 +3,7 @@ djangorestframework>=3.14.0
 ytmusicapi>=1.0.0
 python-dotenv>=1.0.0
 drf-yasg>=1.21.0
-
+django-cors-headers
+yt-dlp
+beets
+pyacoustid

@@ -1,0 +1,26 @@
+directory: /Music_Library  # where your cleaned library will live
+library: /Music_Library/lib.db
+
+import:
+  move: yes        # move files into the library
+  write: yes       # write metadata tags to files
+  copy: no
+  auto: yes        # automatically fetch missing metadata
+  quiet: yes       # suppress prompts and messages
+  timid: no        # do NOT ask for confirmation on changes
+
+ui:
+  terminal_width: 0
+
+paths:
+  default: $albumartist/$album/$track $title
+  singleton: $artist/singles/$title
+
+duplicates:
+  keys: [album, artist, length]
+
+fields:
+  PURL: str
+  genre: str
+
+plugins: chroma fetchart duplicates info

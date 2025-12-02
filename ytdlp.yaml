@@ -1,0 +1,24 @@
+# Extract audio only
+-x
+
+# Audio format
+--audio-format opus
+
+# Suppress warnings
+--no-warnings
+
+# Best audio quality
+--audio-quality 0
+
+# Embed thumbnail and metadata
+--embed-thumbnail
+--embed-metadata
+
+# Replace artist metadata
+--replace-in-metadata artist ",.*" ""
+
+# Do not download playlists
+--no-playlist
+
+# Do not resume partially downloaded files
+--no-continue
